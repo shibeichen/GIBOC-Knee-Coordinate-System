@@ -3,16 +3,67 @@
 clearvars 
 close all
 
-addpath(genpath(strcat('C:\Users\87123\Documents\GitHub\GIBOC-Knee-Coordinate-System','/SubFunctions')));
+% addpath(genpath(strcat('C:\Users\87123\Documents\GitHub\GIBOC-Knee-Coordinate-System','/SubFunctions')));
 
-% Testing TD02 patella
-subDir = 'E:\OneDrive - Griffith University\___Current_Project_data\_Project_2_KNEE\_pipeline1_ID_v2\bone_geometry\TD02';
+dir = 'E:\OneDrive - Griffith University\___Current_Project_data\_Project_2_KNEE\_pipeline1_ID_v2\bone_geometry\';
+
+% Testing subject 
+subject = 'TD03';
+
+subDir = fullfile(dir,subject);
+
+%% Debug plot before patella algorithm 
+addpath('C:\Users\87123\Documents\GitHub\knee-PM\visualization\')
+
+fem_name = subject + "_femur_r_with_cart.stl";
+fem_tri = stlread(fullfile(subDir,fem_name));
+
+% stl format 
+pat_name = subject + "_patella_r_with_cart.stl";
+pat_tri = stlread(fullfile(subDir,pat_name));
+
+
+fig = figure();
+hold on;
+
+plotMesh(fem_tri,fig);
+plotMesh(pat_tri,fig)
+
+%% Debug, Use within the RPatellaFun()
+% Plot inital Inertia property calculation
+% plotCoordinateSys(V_all(:,1), V_all(:,2),V_all(:,3),Center,gcf,50)
+
 
 %% Example for a Patella
-[Patella] = ReadMesh(strcat(subDir,'/TD02_patella_r_with_cart.stl'));
+[Patella] = ReadMesh(strcat(subDir,sprintf('/%s_patella_r_with_cart.stl',subject)));
 
 [ PatACSsResults, PatellaTriangulations ] = RPatellaFun( Patella );
 PlotPatella( PatACSsResults.VR, PatellaTriangulations )
+
+%% Quick plot, femur & patella 
+addpath('C:\Users\87123\Documents\GitHub\knee-PM\visualization\')
+
+fem_name = subject + "_femur_r_with_cart.stl";
+fem_tri = stlread(fullfile(subDir,fem_name));
+
+% stl format 
+pat_name = subject + "_patella_r_with_cart.stl";
+pat_tri = stlread(fullfile(subDir,pat_name));
+
+
+fig = figure();
+hold on;
+
+plotMesh(fem_tri,fig,'faceAlpha',0.3);
+plotMesh(pat_tri,fig,'faceAlpha',0.3);
+
+CSV = PatACSsResults.VR.V;
+plotCoordinateSys(CSV(:,1),CSV(:,2),CSV(:,3),PatACSsResults.VR.Origin,fig,50)
+
+% Plot patella art surf 
+plotMesh(PatellaTriangulations.PatArtSurf, fig, "faceColor",'r','faceAlpha', 0.3)
+plotPoints(PatellaTriangulations.RidgePts_Separated,fig,'Color','g','Size',15)
+
 
 % EXAMPLE %
 % -------------------------------------------------------------------------
